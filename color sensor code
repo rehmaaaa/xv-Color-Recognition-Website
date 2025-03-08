@@ -1,0 +1,156 @@
+/*The color sensor needs to be calibrated before using. First connect the RGB LED and the LDR to an arduino
+  and uploade the code . Now, connect the arduino to the PC and open the application. By using
+  the interface select the correct COM Port for the arduino. When establishing the connection the arduino will
+  automatically reset itself. Then by following the calibration calibrate the sensor
+  */
+#define PIN             3        // LED on digital pin 3
+#define ldrPin          6        // LDR on analog pin 0
+#define readingDelay   10        // Delay between two readings
+#define wait            5        // Delay between each color
+#define bnwTimes        5        // How much readings the sensor should get to calculate an average for black and white balance
+
+  
+
+int avg;
+int rgb[] = {0, 0, 0};
+int whiteBalance[] = {0, 0, 0};
+int blackBalance[] = {0, 0, 0};
+float color[] = {0, 0, 0};
+
+void setup() {
+  calibration = false;
+  led.begin();                                  // Initialize 
+  Serial.begin(9600);                           // Begin the Serial communication
+  led.Color(0, 0, 0);                            // Turn off the LED
+  led.show();                                   // Show new values
+  delay(6000);                                  // Delay some time 
+}
+void loop() {
+  if (calibration == false) {
+    colorSeq(0);
+    getWhite();                   // fetch RGB values from a white surface
+    colorSeq(0);
+    getBlack();                   // fetch values from a black surface
+    colorSeq(1);
+    calibration = true;           // Mark the calibration 
+  }
+  getColor(5);                    // Measure RGB values from a pointed surface. 
+  printColor();                   // Print the RGB value
+}
+
+void fetchWhite() {                         // fetch values from a white surface
+  Serial.println("white:");
+  for (int i = 0; i <= 2; i++) {
+    int rgb[] = {0, 0, 0};
+    if (i == 0) {
+      rgb[0] = 255;
+    }
+    else if (i == 1) {
+      rgb[1] = 255;
+    }
+    else if (i == 2) {
+      rgb[2] = 255;
+    }
+    led.Color(rgb[0], rgb[1], rgb[2]);
+    led.show();
+    delay(20);
+    getReadings(bnwTimes);
+    whiteBalance[i] = avg;
+    Serial.println(whiteBalance[i]);
+    
+  }
+}
+
+void fetchBlack() {                                   // fetch values from a black surface
+  Serial.println("Black:");
+  for (int i = 0; i <= 2; i++) {
+    int rgb[] = {0, 0, 0};
+    if (i == 0) {
+      rgb[0] = 255;
+    }
+    else if (i == 1) {
+      rgb[1] = 255;
+    }
+    else if (i == 2) {
+      rgb[2] = 255;
+    }
+   led.Color(rgb[0], rgb[1], rgb[2]);
+    led.show();
+    delay(20);
+    getReadings(bnwTimes);
+    blackBalance[i] = avg;
+    Serial.println(blackBalance[i]);
+  }
+}
+voifetchColor(byte time) {
+  for (int i = 0; i <= 2; i++) {
+    int rgb[] = {0, 0, 0};
+    if (i == 0) {
+      rgb[0] = 255;
+    }
+    else if (i == 1) {
+      rgb[1] = 255;
+    }
+    else if (i == 2) {
+      rgb[2] = 255;
+    }
+    led.Color(rgb[0], rgb[1], rgb[2]);
+    led.show();
+    delay(40);
+
+    int read = 0;
+    int total = 0;
+    for (byte u = 1; u <= timesC; u++) {
+      read = analogRead(ldrPin);            // Get readings from the analog pin
+      total += read;                       // Make a total from read 
+      delay(readingDelay);                      // Use a delay between two readings
+    }
+    int preAvg = total / time;
+    if (preAvg > blackBalance[i] && preAvg< whiteBalance[i]) {     // Make sure 'preAverage' is in between highest and lowest value
+      avg = preAverage;                                                 // Drop 'preAverage' value into 'avg' variable
+
+      float differ1 = whiteBalance[i] - blackBalance[i];                    // Calculate the RGB color value
+      float differ2 = avg - blackBalance[i];
+      float diff3 = differ2 / differ1;
+      color[i] = diff3 * 255;
+    }
+   
+   
+  }
+}
+void fetchReadings(byte time) {          // fetching readings from the LDR
+  int read;
+  int total = 0;
+  for (byte u = 1; u <= time; u++) {
+    read = analogRead(ldrPin);
+    total += read;                   // Make the total by adding each reading values together
+    delay(readingDelay);                // delay some tome between two readings
+  }
+  avg = total / times;              // Calculate the avg
+}
+
+void colorCycle() {
+for ( int i = 1; i <= 10; i++) {
+    led.Color(0, 0, 0);
+    led.show();
+    delay(50);
+    led.Color(0, 0, 255);
+    led.show();
+    delay(200);
+  }
+  delay(1500);
+}
+
+void printcolor(){
+void printColor() {                     // Print RGB values
+  int pColor[] = {0, 0, 0};
+  pColor[0] = color[0];                 // convert float into int
+  pColor[1] = color[1];
+  pColor[2] = color[2];
+  
+  // Print red and green values
+  // If a value less than 10, add two zeros in front
+  // If a value greater than 9 and less than 99, add one zero in front
+// Else, print the value
+ // Print Blue value
+  }
